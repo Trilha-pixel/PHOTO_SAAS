@@ -1,18 +1,13 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
 import { GoogleAuth } from 'google-auth-library';
 
 // --- Configuração dos Clientes de IA ---
 // NOTA: Isso requer variáveis de ambiente em .env.local ou Vercel:
-// GEMINI_API_KEY = "sua-chave-api-gemini-aqui"
 // VERTEX_AI_API_KEY = "sua-chave-api-vertex-ai-aqui" (nova - preferencial)
 // GOOGLE_CLOUD_PROJECT = "seu-projeto-gcloud" (fallback se não usar API Key)
 // GOOGLE_CLOUD_LOCATION = "us-central1" (fallback se não usar API Key)
 // GOOGLE_APPLICATION_CREDENTIALS_JSON = "conteúdo do JSON da service account" (fallback)
 // ----------------------------------------------------
-
-// Cliente Gemini (para Análise de Visão)
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 // --- Helper para converter Arquivo (File) para base64 ---
 async function fileToBase64(file: File): Promise<{ data: string; mimeType: string }> {

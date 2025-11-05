@@ -1,143 +1,117 @@
-PRD: Gerador de Meme Político
-Versão: 1.1 (Revisado para Inpainting)
-Autor: (Seu Nome/Empresa)
-Status: Rascunho
-Última Atualização: 04 de Novembro de 2025
+PRD: Template MVP - Gerador de Imagem (Vertex AI)
+Versão: 1.0 (Educacional)
+Autor: (realfelipetop)
+Status: Proposta
+Data: 05 de Novembro de 2025
 Histórico de Alterações
-v1.1 (04/11/2025): Migração da "Abordagem 2 (Geração Pura)" para a "Abordagem 1 (Inpainting de Base)". A geração pura se mostrou incapaz de preservar a identidade do amigo. A Abordagem 1 é mais robusta. O contrato da API (6.2) foi atualizado para refletir essa mudança.
+v1.0 (05/11/2025): Criação inicial. O foco é migrar de um produto de nicho (ex: "Gerador de Meme") para um template de aprendizado genérico e minimalista. A funcionalidade principal é o "Prompt-to-Image" puro, por ser o MVP mais simples para fins educacionais.
 
 1. Visão Geral e Objetivo
 1.1. O Produto
-Um SaaS de página única (Single-Page Application) que permite aos usuários gerar imagens fotorrealistas e engraçadas de si mesmos (ou de amigos) interagindo com os políticos Jair Bolsonaro ou Lula.
-1.2. O Problema
-Usuários buscam formas rápidas e fáceis de criar conteúdo de humor (memes) para entretenimento e compartilhamento em redes sociais. Ferramentas de edição de imagem tradicionais são complexas, e ferramentas de IA genéricas não são focadas nesta tarefa específica.
-1.3. A Solução (Atualizada)
-Adaptaremos o template gemini-image-editing-nextjs-quickstart para criar uma ferramenta de "um clique". O usuário faz o upload de uma foto de referência (o "amigo") e escolhe um político. O aplicativo usará uma imagem de base pré-preparada do político e aplicará inpainting (preenchimento) para inserir o amigo na cena, garantindo a preservação da identidade de ambos. O resultado é uma imagem pronta para ser baixada e compartilhada.
+Um repositório "template" (boilerplate) no GitHub. O projeto é um app Next.js minimalista que provê a funcionalidade mais básica de IA Generativa: Prompt-to-Image. Ele é desenhado para ser um ponto de partida limpo e seguro para estudantes.
+1.2. O Problema (do Aluno)
+Alunos que desejam aprender a integrar APIs de IA (como a Vertex AI) em aplicações web enfrentam três barreiras comuns:
+Complexidade de Setup: Configurar um ambiente de desenvolvimento seguro.
+Segurança de Chaves: Não sabem como proteger suas chaves de API, arriscando-se a expô-las no GitHub.
+Foco: Exemplos oficiais são complexos demais ou focados em casos de uso que desviam do aprendizado principal.
+1.3. A Solução
+Um template Next.js que resolve esses problemas:
+UI Mínima: Um frontend (React) com apenas um campo de texto e um botão.
+Backend Seguro: Uma API Route (/pages/api/...) que é o único ponto de contato com a Vertex AI.
+Segurança: As chaves de API são carregadas no backend via variáveis de ambiente (.env.local) e nunca são expostas ao navegador.
+Foco: O código é focado 100% em "receber um prompt -> enviar à Vertex AI -> retornar a imagem".
+
 2. Público-Alvo
-Usuários de Redes Sociais: Pessoas ativas no Instagram, WhatsApp, X (Twitter) e TikTok.
-Criadores de Conteúdo: Indivíduos que produzem memes e conteúdo viral.
-Público Geral: Qualquer pessoa com senso de humor que queira fazer uma "brincadeira" (troll) com um amigo.
-3. Histórias de Usuário (User Stories)
+Público Primário: Alunos (do seu curso) que precisam de um ponto de partida funcional para projetos e aprendizado.
+Público Secundário: Desenvolvedores que buscam um "quickstart" limpo para a API de imagem da Vertex AI com Next.js.
+
+3. Histórias de Usuário (Focadas no Aluno)
 ID
 Como um...
 Eu quero...
 Para que...
-US-101
-Usuário
-Fazer o upload de uma foto do meu amigo.
-Usar o rosto dele como referência para a geração da imagem.
-US-102
-Usuário
-Escolher entre "Lula" ou "Bolsonaro" com um único clique.
-Definir com qual político meu amigo vai aparecer.
-US-103
-Usuário
-Ver uma animação de "carregando" após clicar em "Gerar".
-Eu saiba que o sistema está processando meu pedido.
-US-104
-Usuário
-Ver a imagem final gerada (o meme) claramente na tela.
-Avaliar o resultado da "zoeira".
-US-105
-Usuário
-Baixar a imagem gerada para o meu celular ou computador.
-Poder compartilhar o meme no WhatsApp ou Instagram.
+A-101
+Aluno
+Clonar (ou usar como template) um repositório no GitHub.
+Começar meu projeto rapidamente sem configurar o Next.js do zero.
+A-102
+Aluno
+Ler um README.md claro.
+Entender como configurar minhas credenciais do Google Cloud (Service Account) em um arquivo .env.local.
+A-103
+Aluno
+Rodar npm run dev após a configuração.
+Ver o app funcionando imediatamente no localhost.
+A-104
+Aluno
+Inspecionar o arquivo /pages/api/generate.js.
+Entender exatamente como o backend (servidor) chama a API da Vertex AI de forma segura.
+A-105
+Aluno
+Inspecionar o arquivo /pages/index.js.
+Entender como o frontend (cliente) envia o prompt para sua própria API de backend.
+A-106
+Aluno
+Ver um código "limpo" e minimalista.
+Não me distrair com lógicas de negócio complexas (como login, banco de dados, ou ferramentas de edição).
 
-4. Requisitos Funcionais (Adaptação do Template)
-4.1. (F-01) Simplificação da Interface (Remoções)
-O objetivo é remover toda a complexidade do template original.
-REMOVER: O seletor de modo de edição (ex: "Inpainting", "Outpainting", "Background Replace").
-REMOVER: A paleta de ferramentas de desenho de máscara (pincel, borracha).
-REMOVER: O campo de entrada de prompt de texto (<input type="text"> ou <textarea>). O prompt será 100% controlado pelo backend.
-4.2. (F-02) Componente de Upload (Manutenção)
-MANTER: A funcionalidade de "arrastar e soltar" (drag-and-drop) ou "clicar para enviar" uma imagem.
-Nome: Este componente deve ser renomeado para "1. Envie a foto do seu Amigo".
-4.3. (F-03) Componente de Seleção (Adição)
-Abaixo do upload, os botões de ação principais serão adicionados.
-ADICIONAR: Um grupo de botões com o texto:
-[Gerar com Bolsonaro]
-[Gerar com Lula]
-Estado: Estes botões devem ficar desabilitados (disabled) até que uma imagem seja carregada com sucesso no (F-02).
-4.4. (F-04) Feedback de Processamento
-MANTER: O estado de "Loading...". Um spinner ou overlay deve cobrir a área de resultado.
-Texto: O texto de loading deve ser "Criando sua obra-prima...".
-4.5. (F-05) Exibição e Download do Resultado
-MANTER: O componente que exibe a imagem final.
-ADICIONAR: Um botão proeminente abaixo da imagem de resultado: [Baixar Imagem].
-5. Requisitos Não Funcionais
-(NFR-01) Responsividade: O design deve ser mobile-first.
-(NFR-02) Desempenho (Frontend): O carregamento da página inicial (Next.js) deve ser rápido.
-(NFR-03) Simplicidade: O fluxo completo (Upload -> Selecionar -> Ver Resultado) não deve exigir mais que 3 cliques.
-6. Plano de Integração (Mock-first)
-6.1. Fase 1: Desenvolvimento com Mocks (Frontend)
-O fluxo de mock permanece o mesmo para validar o frontend.
-Usuário faz upload de amigo.jpg (F-02).
-Usuário clica em [Gerar com Bolsonaro] (F-03).
-App exibe "Loading" (F-04) por 2 segundos (via setTimeout).
-App exibe uma imagem estática local (public/mocks/bolsonaro_result_mock.jpg) (F-05).
-Botão de download (F-05) baixa essa imagem mockada.
-6.2. Fase 2: Contrato da API (Backend) - ATUALIZADO (Inpainting)
-Quando o backend estiver pronto, ele deverá seguir este contrato rigoroso. A API agora recebe 3 arquivos para realizar o inpainting.
-Rota: POST /api/generate
-Request Body: FormData
-friendImage: (File) O objeto do arquivo de imagem do amigo (enviado pelo usuário).
-baseImage: (File) A imagem base do político com o "buraco" (ex: bolsonaro_base.png).
-maskImage: (File) A imagem da máscara P&B (ex: bolsonaro_mask.png).
-Lógica do Backend: O backend usará a friendImage como referência de rosto/pessoa e a usará para preencher a área branca da maskImage por cima da baseImage.
-Response (Sucesso 200 OK):
-Content-Type: image/png (ou image/jpeg)
-Body: Os bytes puros da imagem gerada.
-Response (Erro 400/500):
-Content-Type: application/json
-Body: { "error": "Mensagem de erro descritiva" }
-6.3. Fase 2: Conexão (Substituição do Mock) - ATUALIZADO
-No frontend, a função handleGenerate que continha o setTimeout será atualizada:
-Em vez do setTimeout, ela fará uma chamada fetch('/api/generate') (POST).
-Atualização: Ela criará um FormData e adicionará os 3 arquivos:
-friendImage: O arquivo do upload (F-02).
-baseImage: O arquivo correspondente ao botão clicado (ex: public/base_images/bolsonaro_base.png).
-maskImage: O arquivo correspondente ao botão clicado (ex: public/base_images/bolsonaro_mask.png).
-Ela tratará a resposta:
-Se response.ok, ela pegará a resposta como um blob(), criará um URL.createObjectURL(blob) e o definirá como a imagem de resultado (F-05).
-Se !response.ok, ela exibirá uma mensagem de erro ao usuário.
-7. Escopo Futuro (Pós-V1)
-(V1.1) Adicionar mais políticos (ex: Ciro, Marina, etc.).
-(V1.2) Adicionar mais imagens base/cenários para cada político.
-(V1.3) Botões de compartilhamento direto (WhatsApp, Twitter).
 
-Fluxogramas
-1. Fluxograma da Fase 1 (Desenvolvimento Mock-first)
-(Este fluxograma não muda, pois a experiência do usuário no frontend é a mesma)
-Snippet de código
+4. Requisitos Funcionais (A UI do Template)
+A interface deve ser a mais simples possível para focar na funcionalidade.
+(F-01) Entrada de Prompt: Um (1) campo de texto (<input type="text">) para o usuário digitar o prompt.
+(F-02) Ação de Geração: Um (1) botão ("Gerar") para submeter o pedido.
+(F-03) Feedback de Processamento: O botão deve ficar desabilitado e um indicador de "Carregando..." deve aparecer enquanto a API processa a imagem.
+(F-04) Exibição de Resultado: Uma área (<img>) que exibe a imagem gerada pela Vertex AI.
+(F-05) Tratamento de Erro: Se a API falhar, uma mensagem de erro simples deve ser exibida ao usuário (ex: alert("Erro ao gerar imagem")).
+(F-06) Download (Opcional, mas recomendado): Um botão de "Baixar Imagem" aparece após a geração bem-sucedida.
+5. Requisitos Não-Funcionais (A Arquitetura do Template)
+Estes são os requisitos mais importantes para um template educacional.
+(NF-01) Stack de Tecnologia: Next.js (com API Routes) e o SDK google-cloud-aiplatform.
+(NF-02) Arquitetura de Segurança:
+O frontend (React) não pode conter NENHUMA chave de API ou SDK do Google.
+Toda a lógica da Vertex AI deve residir em uma API Route (ex: /pages/api/generate).
+(NF-03) Gerenciamento de Credenciais:
+O projeto deve incluir um arquivo .env.local.example listando as variáveis necessárias (ex: GCP_PROJECT_ID, GCP_LOCATION, GOOGLE_APPLICATION_CREDENTIALS).
+O projeto deve incluir um .gitignore que bloqueia .env.local, *.json e node_modules/.
+(NF-04) Documentação (README.md): O README é o manual principal e deve conter:
+Instruções claras de Setup do Google Cloud (Ativar API, Criar Service Account).
+Instruções claras de Setup Local (npm install, npm run dev).
+
+6. Fluxo da Aplicação (Visão do Aluno)
+O aluno roda npm run dev e abre localhost:3000.
+Frontend: Ele vê um campo de texto e um botão "Gerar".
+Frontend: Ele digita "um cachorro fofo no espaço" e clica em "Gerar".
+Frontend: O app mostra "Carregando..." e faz uma chamada fetch para POST /api/generate com o prompt no corpo (body) da requisição.
+Backend: A API Route (/api/generate) recebe a requisição.
+Backend: O servidor lê as credenciais do .env.local e autentica no Google Cloud.
+Backend: O servidor chama a API da Vertex AI (modelo Imagen) com o prompt recebido.
+Backend: A Vertex AI processa e retorna os bytes da imagem.
+Backend: O servidor converte a imagem (ex: para Base64) e a envia como resposta JSON para o frontend.
+Frontend: O app recebe o JSON, atualiza o estado (state) com a imagem Base64, e a exibe na tag <img>.
+
+
+
+
 graph TD
-    subgraph "Fase 1: Fluxo Mock (6.1)"
-        M_A[Início: Usuário acessa a página] --> M_B(F-02: Usuário faz upload de 'amigo.jpg');
-        M_B --> M_C(F-03: Usuário clica em 'Gerar com Bolsonaro');
-        M_C --> M_D[App exibe 'Loading...' por 2s (F-04)];
-        M_D --> M_E[App exibe imagem local 'public/mocks/bolsonaro_result_mock.jpg' (F-05)];
-        M_E --> M_F(F-05: Usuário clica em 'Baixar Imagem');
-        M_F --> M_G[Navegador baixa a imagem mock];
-        M_G --> M_H[Fim];
+    A[Início: Aluno abre localhost:3000] --> B(Vê UI: Input + Botão "Gerar")
+    B --> C{Aluno digita prompt e clica em "Gerar"}
+
+    subgraph Frontend (Navegador do Aluno)
+        C --> D[1. Mostra "Carregando..." e envia requisição POST /api/generate]
     end
 
-2. Fluxograma da Fase 2 (Fluxo Real com Inpainting) - ATUALIZADO
-(Este fluxograma foi atualizado para refletir o novo contrato da API)
-Snippet de código
-graph TD
-    subgraph "Fase 2: Fluxo Real com Backend (6.2 e 6.3)"
-        B_A[Início: Usuário acessa a página] --> B_B(F-02: Usuário faz upload da foto do amigo);
-        B_B --> B_C(F-03: Usuário clica em 'Gerar com...' [Bolsonaro ou Lula]);
-        B_C --> B_D[Frontend exibe 'Loading...' (F-04)];
-        B_D --> B_E[Frontend envia POST /api/generate com Amigo + Imagem Base + Máscara (6.2)];
-        B_E --> B_F((Backend processa com a LLM (Inpainting) e retorna bytes da imagem));
-        B_F --> B_G{API retornou 'response.ok'? (6.3)};
-        
-        B_G -- Sim --> B_I[Frontend converte bytes (blob) e exibe a imagem gerada (F-05)];
-        I --> B_J(F-05: Usuário clica em 'Baixar Imagem');
-        B_J --> B_K[Navegador baixa a imagem gerada];
-        B_K --> B_L[Fim];
-        
-        B_G -- Não --> B_H[Frontend exibe mensagem de erro];
-        B_H --> B_C;
+    subgraph Backend (Servidor Next.js)
+        D --> E[2. API Route /api/generate recebe o prompt]
+        E --> F[3. Lê .env.local e autentica no Google Cloud]
+        F --> G[4. Chama a API da Vertex AI (Modelo Imagen) com o prompt]
+        G --> H(5. Vertex AI processa e retorna a imagem)
+        H --> I[6. Servidor codifica a imagem (ex: Base64) e responde com JSON]
     end
+
+    subgraph Frontend (Navegador do Aluno)
+        I --> J[7. App recebe o JSON com a imagem]
+        J --> K[8. Esconde "Carregando..." e exibe a imagem na tag <img>]
+    end
+
+    K --> Z[Fim: Aluno vê a imagem gerada]
 
