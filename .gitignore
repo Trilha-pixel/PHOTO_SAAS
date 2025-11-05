@@ -78,6 +78,19 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+.env*.local
+
+# Arquivos de credenciais do Google Cloud (Service Account)
+# IMPORTANTE: Nunca commitar arquivos JSON de credenciais!
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tailwind.config.ts
+!next.config.ts
+!postcss.config.mjs
+!eslint.config.mjs
+!components.json
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -86,6 +99,7 @@ web_modules/
 # Next.js build output
 .next
 out
+.swc
 
 # Nuxt.js build / generate output
 .nuxt
