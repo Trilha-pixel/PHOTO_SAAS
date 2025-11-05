@@ -37,13 +37,29 @@ export default function Home() {
       if (!response.ok) {
         // Tentar extrair mensagem de erro do JSON
         let errorMessage = `Erro ${response.status}: ${response.statusText}`;
+        let errorDetails = '';
         try {
           const errorData = await response.json();
-          errorMessage = errorData.error || errorData.details || errorMessage;
+          errorMessage = errorData.error || errorMessage;
+          errorDetails = errorData.details || '';
+          // Se houver originalError em desenvolvimento, incluir também
+          if (errorData.originalError) {
+            errorDetails = `${errorDetails}\n\nErro original: ${errorData.originalError}`;
+          }
         } catch {
-          // Se não conseguir parsear JSON, usar mensagem padrão
+          // Se não conseguir parsear JSON, tentar ler como texto
+          try {
+            const errorText = await response.text();
+            errorMessage = errorText || errorMessage;
+          } catch {
+            // Se tudo falhar, usar mensagem padrão
+          }
         }
-        throw new Error(errorMessage);
+        // Combinar mensagem e detalhes
+        const fullErrorMessage = errorDetails 
+          ? `${errorMessage}\n\n${errorDetails}` 
+          : errorMessage;
+        throw new Error(fullErrorMessage);
       }
 
       // Extrair dados da resposta
@@ -115,7 +131,16 @@ export default function Home() {
       {/* Mensagem de Erro */}
       {error && (
         <div className="error-message">
-          <strong>Erro:</strong> {error}
+          <strong>Erro:</strong>
+          <pre style={{ 
+            whiteSpace: 'pre-wrap', 
+            wordBreak: 'break-word',
+            marginTop: '8px',
+            fontSize: '14px',
+            lineHeight: '1.5'
+          }}>
+            {error}
+          </pre>
         </div>
       )}
 
