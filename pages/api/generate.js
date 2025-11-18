@@ -15,14 +15,29 @@ async function getAccessToken() {
   // Opção 1: Se temos credenciais JSON inline (Service Account)
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     try {
-      const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+      // Tentar parsear o JSON - pode estar com quebras de linha ou espaços extras
+      let jsonString = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.trim();
+      
+      // Remover quebras de linha desnecessárias e espaços extras
+      jsonString = jsonString.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+      
+      const credentials = JSON.parse(jsonString);
+      
+      // Validar se é um JSON válido de Service Account
+      if (!credentials.type || credentials.type !== 'service_account') {
+        throw new Error('O JSON não parece ser uma Service Account válida. Certifique-se de que o JSON contém "type": "service_account"');
+      }
+      
       auth = new GoogleAuth({
         credentials,
         scopes: ['https://www.googleapis.com/auth/cloud-platform'],
       });
       console.log('✅ Usando GOOGLE_APPLICATION_CREDENTIALS_JSON');
     } catch (error) {
-      throw new Error(`Erro ao parsear GOOGLE_APPLICATION_CREDENTIALS_JSON: ${error.message}`);
+      if (error instanceof SyntaxError) {
+        throw new Error(`Erro ao parsear GOOGLE_APPLICATION_CREDENTIALS_JSON: ${error.message}. Verifique se o JSON está completo e válido. Dica: o JSON deve estar em UMA ÚNICA LINHA no .env.local, sem quebras.`);
+      }
+      throw new Error(`Erro ao processar GOOGLE_APPLICATION_CREDENTIALS_JSON: ${error.message}`);
     }
   } 
   // Opção 2: Se temos caminho para arquivo JSON
@@ -150,9 +165,11 @@ export default async function handler(req, res) {
     console.log('🔑 Obtendo token de acesso...');
     let accessToken;
     
-    // Opção 1: Se temos VERTEX_AI_API_KEY, usar diretamente (mais simples)
+    // IMPORTANTE: Vertex AI não aceita API Keys simples - requer OAuth2 (Service Account)
+    // Se VERTEX_AI_API_KEY estiver configurada, vamos tentar, mas provavelmente falhará
     if (process.env.VERTEX_AI_API_KEY) {
-      console.log('✅ Usando VERTEX_AI_API_KEY');
+      console.log('⚠️ VERTEX_AI_API_KEY detectada, mas Vertex AI requer OAuth2');
+      console.log('⚠️ Tentando usar API Key (pode falhar - Vertex AI geralmente não aceita API Keys)');
       accessToken = null; // Não precisa de token, usa API Key diretamente
     } else {
       // Opção 2: Usar Service Account para obter token
@@ -177,12 +194,15 @@ export default async function handler(req, res) {
     let headers;
     
     if (process.env.VERTEX_AI_API_KEY) {
+      // Tentar endpoint público com API Key (geralmente não funciona para Vertex AI)
+      // Vertex AI requer endpoint regional com OAuth2
       endpoint = `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:predict`;
       headers = {
         'Content-Type': 'application/json',
       };
       // API Key será adicionada como query parameter
       endpoint = `${endpoint}?key=${process.env.VERTEX_AI_API_KEY}`;
+      console.log('⚠️ Usando endpoint público com API Key (pode não funcionar)');
     } else {
       endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:predict`;
       headers = {
@@ -285,9 +305,12 @@ export default async function handler(req, res) {
     if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
       errorMessage = 'Erro de conexão com o Vertex AI';
       errorDetails = 'Não foi possível conectar ao serviço do Vertex AI. Verifique sua conexão com a internet.';
+    } else if (error.message?.includes('API keys are not supported') || error.message?.includes('UNAUTHENTICATED')) {
+      errorMessage = 'API Key não suportada pelo Vertex AI';
+      errorDetails = 'O Vertex AI não aceita API Keys simples. Você precisa usar autenticação OAuth2 com Service Account. Remova VERTEX_AI_API_KEY do .env.local e configure GOOGLE_APPLICATION_CREDENTIALS_JSON com o JSON completo da Service Account (em uma única linha, sem quebras).';
     } else if (error.message?.includes('authentication') || error.message?.includes('credential') || error.message?.includes('token') || error.message?.includes('Unauthorized') || error.message?.includes('403')) {
       errorMessage = 'Erro de autenticação';
-      errorDetails = 'Credenciais do Google Cloud inválidas ou não configuradas. Verifique GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_APPLICATION_CREDENTIALS_JSON ou VERTEX_AI_API_KEY no arquivo .env.local';
+      errorDetails = 'Credenciais do Google Cloud inválidas ou não configuradas. O Vertex AI requer Service Account (OAuth2), não API Keys. Configure GOOGLE_APPLICATION_CREDENTIALS ou GOOGLE_APPLICATION_CREDENTIALS_JSON no arquivo .env.local';
     } else if (error.message?.includes('quota') || error.message?.includes('quota') || error.message?.includes('429')) {
       errorMessage = 'Quota excedida';
       errorDetails = 'Você excedeu a quota de requisições do Vertex AI. Verifique seu plano.';
